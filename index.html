@@ -159,8 +159,7 @@
     transition:opacity .4s ease; }
   #brand.hide{ opacity:0; pointer-events:none; }
   .sig-mini{ height:24px; width:auto; }
-  .brand-txt{ display:none; font-size:16px; letter-spacing:.24em; color:var(--dim); }
-  .brand-txt.show{ display:block; }
+  .brand-txt{ display:block; font-size:16px; letter-spacing:.24em; color:var(--dim); }
   .brand-role{ font-size:12px; letter-spacing:.3em; color:var(--dim); opacity:.7;
     transition:color .3s ease, opacity .3s ease; }
   #brand:hover .brand-txt, #brand:hover .brand-role{ color:var(--accent); opacity:1; }
@@ -239,6 +238,7 @@
   .dl-pmeta{ display:flex; align-items:baseline; gap:12px; font-size:13px;
     letter-spacing:.2em; color:var(--dim); font-variant-numeric:tabular-nums; }
   .dl-pmeta .sep{ color:rgba(157,147,173,.45); }
+  .dl-pmeta[hidden]{ display:none !important; }
   .dl-share{ font-size:13px; letter-spacing:.18em; color:rgba(157,147,173,.85); transition:color .3s; }
   .dl-share:hover{ color:var(--accent2) }
   .dl-share.ok{ color:var(--lit) }
@@ -720,8 +720,6 @@
 <div class="cursor-plus" id="cross"></div>
 
 <div id="brand">
-  <img class="sig-mini" src="images/signature-white.png" alt=""
-       onerror="this.classList.add('missing');document.getElementById('brandTxt').classList.add('show')">
   <span class="brand-txt" id="brandTxt">YOLANDA</span>
   <span class="brand-role">GAME DESIGNER</span>
 </div>
@@ -1950,8 +1948,10 @@ draft: true
     if (!sel){
       q('.dlDate').textContent = ''; q('.dlTag').textContent = '';
       q('.dl-pttl').textContent = ''; q('.dl-body').innerHTML = '';
+      q('.dl-pmeta').hidden = true;            /* 没有日志时：日期·标签·复制链接·中/EN 整行收起 */
       langSw(q('[data-lang-sw]'), false);        /* 没选中条目：切换键置灰 */
     } else {
+      q('.dl-pmeta').hidden = false;
       q('.dlDate').textContent = sel.dstr;
       q('.dlTag').textContent = '#' + sel.tag;
       setTtl(q('.dl-pttl'), null, sel.title, sel.title_en);
