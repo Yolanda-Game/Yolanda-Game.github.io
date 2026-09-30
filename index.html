@@ -4,7 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Yolanda · 游戏设计师</title>
+<!-- 字体预加载：一拿到 HTML 就开始下 woff2，不再等 JS 渲染完才发起 -->
+<link rel="preload" href="fonts/SourceHanSansSC-VF.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/SourceHanSerifSC-VF.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+
     /* 思源黑体（可变字重 250–900） */
   @font-face{
     font-family:"Source Han Sans SC";
@@ -559,6 +563,20 @@
   .pj-hero{ flex:1 1 auto; min-height:0; display:flex; align-items:center; }
   .pj-txt{ max-width:min(760px,62%); }
   #projSec.idx .pj-txt{ max-width:none; width:100%; }
+
+  /* 目录页 · 矮视口（浏览器 150% / 小笔记本窗口）：
+     原来内容比 .pj-hero 高时，居中会让上下同时溢出，「共 N 个」被顶到标题上。
+     改成：索引自己吃掉剩余高度、内部滚动，标题与「共 N 个」之间永远留 18px。 */
+  @media (max-height:700px){
+    #projSec.idx .pj-hero{ align-items:stretch; }
+    #projSec.idx .pj-txt{ display:flex; flex-direction:column;
+      justify-content:center; min-height:0; }
+    /* 目录页这四块本来就是空的（JS 里清空 / 按钮被隐藏），留着只白占约 64px */
+    #projSec.idx .pj-name-en, #projSec.idx .pj-spec,
+    #projSec.idx .pj-spec-en, #projSec.idx .pj-act{ display:none; }
+    #projSec.idx .pj-index{ flex:0 1 auto; }
+  }
+
   @keyframes pjRise{ from{ opacity:0; transform:translateY(7px) } to{ opacity:1; transform:none } }
   .pj-name{ font-family:var(--font-cn); font-weight:400;
     font-size:clamp(32px,min(4.4vw,7vh),72px); letter-spacing:.06em; line-height:1.24;
@@ -685,7 +703,7 @@
     color:rgba(157,147,173,.6); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   @media (max-width:1180px){ .wk-grid{ grid-template-columns:repeat(3, minmax(0,1fr)); } }
   @media (max-width:820px){ .wk-grid{ grid-template-columns:repeat(2, minmax(0,1fr));
-    grid-template-rows:repeat(4, minmax(0,1fr)); } }
+    grid-template-rows:repeat(3, minmax(0,1fr)); } }
 
   .wk-pager{ flex:0 0 auto; display:flex; align-items:baseline; gap:14px;
     margin-top:clamp(16px,2vh,24px);
@@ -797,10 +815,11 @@
     /* ⑤ 项目轮播：品类那行跟着分辨率缩小，不再折行 */
     #pSpec, #pSpecEn{ font-size:.88em; letter-spacing:.08em; }
 
-    /* ⑥ 技能块：手机上不再由 JS 分配高度，改按内容自然高度（标签保证看得见） */
-    .bk{ height:auto !important; }
+    /* ⑦ 手机上技能块不做折叠：标签直接全部显示（最稳，不可能被裁） */
+    .bk{ height:auto !important; overflow:visible; }
     .bk .sp{ display:none; }
-    .bk.on .bd{ max-height:none; }
+    .bk .bd{ display:block !important; max-height:none !important;
+      opacity:1 !important; margin-top:12px !important; }
   }
 
 </style>
@@ -1498,6 +1517,8 @@ draft: true
   const $$ = s => Array.from(document.querySelectorAll(s));
   const p2 = n => String(n).padStart(2,'0');
   const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  /* 详情层"点空白关闭"的例外名单（项目层 / 作品层共用） */
+  const NO_CLOSE = '.dl-share, .lg-sw, .pn, .post, .shot-box, .vid, .pl, .vl, .pj-ttl, .pj-ttl-en, .pj-role, .pj-sub, a, iframe';
 
   /* ============ 中英切换 ============
      只切详情页（日志 / 项目 / 作品）里的正文与标题；界面文案（"项目详情""关闭""共 N 件"）不动。
@@ -2403,7 +2424,7 @@ After equipping a small resonator originally on display as an exhibit, the playe
       videos:[],
       md:`## 项目概述
 
-玩家化身为一只==侦探猫==，于深夜潜入一座废弃工厂，试图深入其核心探寻真相。工厂内漆黑一片，侦探猫为探路拉下电闸，不料竟惊醒了工厂内沉睡已久的机器守卫··面对被唤醒的机械威胁，侦探猫能否巧妙周旋，甚至化险为夷，一路潜入工厂最深处，揭开最终的秘密？
+玩家化身为一只==侦探猫==，于深夜潜入一座废弃工厂，试图深入其核心探寻真相。工厂内漆黑一片，侦探猫为探路拉下电闸，不料竟惊醒了工厂内沉睡已久的机器守卫……面对被唤醒的机械威胁，侦探猫能否巧妙周旋，甚至化险为夷，一路潜入工厂最深处，揭开最终的秘密？
 
 
 ## 核心职责
@@ -2604,7 +2625,7 @@ After equipping a small resonator originally on display as an exhibit, the playe
   $('#mLang').addEventListener('click', () => setLang(LANG === 'cn' ? 'en' : 'cn'));
   pjLayer.addEventListener('click', e => {
     const t = e.target;
-    if (t.closest && t.closest('.dl-share, .lg-sw, .pn, .post, .shot-box, .vid, .pl, .vl, .pj-ttl, .pj-ttl-en, .pj-role, .pj-sub, a, iframe')) return;
+    if (t.closest && t.closest(NO_CLOSE)) return;
     pjClose();
   });
   $('#sPrev').addEventListener('click', () => {
@@ -2902,7 +2923,7 @@ After equipping a small resonator originally on display as an exhibit, the playe
   ];
 
   const WK = window.WORKS || [];
-  const WKPER = innerWidth < 1080 ? 6 : 8;   /* 手机 6 件 = 3 行×2 列；大屏 8 件 = 2 行×4 列 */
+  const WKPER = innerWidth < 1180 ? 6 : 8;   /* <1180 时网格是 3 列/2 列 → 每页 6 件才刚好铺满 */
   const WKPREF = ['关卡设计','任务设计','系统设计','叙事设计','UI/UX'];
   const WKSORTED = WK.slice().sort((a, b) => endYM(b.date).localeCompare(endYM(a.date)));  /* 结束年月倒序，新→旧 */
   const WKTAGS = WKPREF.filter(t => WK.some(w => (w.tags||[]).includes(t)))
@@ -3033,7 +3054,7 @@ After equipping a small resonator originally on display as an exhibit, the playe
   });
   wkLayer.addEventListener('click', e => {
     const t = e.target;
-    if (t.closest && t.closest('.dl-share, .lg-sw, .pn, .post, .shot-box, .vid, .pl, .vl, .pj-ttl, .pj-ttl-en, .pj-role, .pj-sub, a, iframe')) return;
+    if (t.closest && t.closest(NO_CLOSE)) return;
     wkClose();
   });
 
