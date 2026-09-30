@@ -112,7 +112,7 @@
   .plan-wrap.play .d{ animation:draw .9s cubic-bezier(.4,0,.2,1) forwards; }
   .plan-wrap.play .w, .plan-wrap.play .poi{ animation:pop .5s ease forwards; }
   .plan-wrap.play .route{ animation:fadein .6s ease forwards; }
-  .plan-wrap.play .walk{ animation:fadein .8s ease 1.8s forwards; }
+  .plan-wrap.play .walk{ animation:fadein .8s ease 1.98s forwards; }
   .plan-wrap.play .ink{ animation:dip 24s linear 1.9s 1 forwards; }
   @keyframes draw{ to{ stroke-dashoffset:0 } }
   @keyframes pop{ from{ opacity:0; transform:scale(.97) } to{ opacity:1; transform:none } }
@@ -354,7 +354,10 @@
   #world section.about{ display:block; padding:0; }
   .ab-body{ flex:1 1 auto; min-height:0; margin-top:clamp(26px,3.6vh,52px);
     display:grid; grid-template-columns:minmax(280px,352px) 1fr;
-    column-gap:clamp(28px,3.4vw,64px); }
+    column-gap:clamp(28px,3.4vw,64px);
+    /* 兜底：内容比屏幕高时可以滚（手机、笔记本缩放）；装得下时完全不出现滚动条 */
+    overflow-y:auto; overscroll-behavior:contain;
+    scrollbar-width:thin; scrollbar-color:rgba(190,205,225,.22) transparent; }
 
   .ab-city{ font-size:clamp(15px,1.25vw,18px); letter-spacing:.2em; color:var(--dim); }
   .about.on .ab-city{ animation:abRise .6s var(--ease) .22s both; }
@@ -467,10 +470,18 @@
   .ab-layer .ph2{ font-size:14px; letter-spacing:.2em; color:rgba(239,233,244,.3); }
 
   @media (max-width:1080px){
-    .ab-body{ grid-template-columns:1fr; grid-template-rows:minmax(0,1fr) minmax(0,1.3fr);
-      row-gap:22px; }
+    /* 窄屏：从上到下自然排，全部按内容高度，谁都不许被压缩 → 不会再叠在一起 */
+    .ab-body{ display:flex; flex-direction:column; gap:22px; }
+    .ab-left, .ab-right{ flex:0 0 auto; }
+    .ab-left{ gap:20px; }
     .ab-right{ border-left:0; padding-left:0; border-top:1px solid var(--line); padding-top:18px; }
     .ab-tl{ margin-top:16px; }
+    /* 联系我层（窄屏）：整层只留一个滚动区 → 卡片和简历一起滚 */
+    .ab-layer .dl-split{ display:block; flex:1 1 auto; min-height:0;
+      overflow-y:auto; overscroll-behavior:contain; }
+    .ab-layer .dl-split > *{ width:100%; min-width:0; height:auto; }
+    .ab-layer .dl-pcol{ height:auto; overflow:visible; padding-right:0; }
+    .ab-layer .contact{ margin-bottom:22px; }
   }
 
   @media (max-width:1200px){
@@ -478,12 +489,10 @@
   }
   @media (max-width:1080px){
     .plan-wrap{ right:-20%; width:110vw; }
-    .dl-split{ grid-template-columns:1fr;
-      grid-template-rows:minmax(144px,28%) minmax(0,1fr); gap:17px; }
     .dl-idx{ border-right:0; border-bottom:1px solid var(--line); padding-right:0; padding-bottom:12px; }
   }
   @media (max-width:816px){
-    :root{ --pad-x:26px; --pad-y:108px; }
+    :root{ --pad-x:26px; --pad-y:84px; }
     .edge-txt{ opacity:.55; font-size:13px; letter-spacing:.22em; }
     .edge .tri{ opacity:.55; }
     #brand{ left:22px; top:19px; }
@@ -499,7 +508,9 @@
     .dl-head{ flex-direction:column; align-items:flex-start; gap:12px; }
     .dl-ttl{ letter-spacing:.3em; }
     .dl-en{ letter-spacing:.2em; }
+    .pj-act{ margin-top:clamp(20px,3vh,32px); }
   }
+
   @media (prefers-reduced-motion: reduce){
     #world, #world section{ transition:none; }
     .glow{ animation:none; }
@@ -576,7 +587,8 @@
   .pj-row:hover .rn{ color:var(--lit-2); }
   .pj-row .rne{ font-size:11px; letter-spacing:.08em; color:var(--dim); }
   .pj-row .rm{ font-size:10px; letter-spacing:.22em; color:rgba(157,147,173,.55); }
-  .pj-row .rs{ margin-left:auto; font-size:12px; letter-spacing:.16em; color:var(--dim);
+  .pj-row .rs{ margin-left:auto; }
+  .pj-row .rs, .pj-row .rd{ font-size:12px; letter-spacing:.16em; color:var(--dim);
     font-variant-numeric:tabular-nums; white-space:nowrap; }
   .pj-row .rs i{ font-style:normal; opacity:.45; padding:0 8px; }
 
@@ -707,6 +719,84 @@
   .lg-sw .on{ color:var(--lit); text-shadow:0 0 14px rgba(255,168,216,.45); }
   .lg-sw[disabled]{ cursor:default; color:rgba(157,147,173,.3); }
   .lg-sw[disabled] .on{ color:rgba(157,147,173,.3); text-shadow:none; }
+
+  /* 有技能块展开时，不许把两栏压扁：让内容把高度撑开，超出就靠 .ab-body 滚 */
+  .ab-body:has(.bk.on) .ab-right,
+  .ab-body:has(.bk.on) .blocks,
+  .ab-body:has(.bk.on) .bcol{ min-height:auto; }
+
+  /* ============ 窄屏补齐（手机 / 笔记本缩放 / iPad） ============ */
+  @media (max-width:1080px){
+
+    /* 技能块：标签改单列，别再挤成两列（图1/图2） */
+    .bk .bd.two{ columns:1; }
+
+    /* 项目页「目录」：索引行允许换行，右边的日期不再被挤出屏幕（图3） */
+    .pj-row{ flex-wrap:wrap; align-items:flex-start; }
+    .pj-row .rs{ margin-left:0; }
+
+    /* 轮播页「查看项目」按钮：给足宽度，两行字不再折行（图4） */
+    .pj-act .ab-btn{ width:min(320px,100%); }
+    .pj-act .ab-btn span{ letter-spacing:.14em; }
+
+    /* 目录页：手机上行距收紧，名字独占一行，日期独占一行 */
+    .pj-row{ padding:12px 0; }
+    .pj-row .rname{ flex:1 1 100%; }
+    .pj-row .rs{ margin-left:0; }
+    .pj-row .rd{ flex:1 1 100%; }
+    .pj-row .rs i.sp{ display:none; }        /* 日期换行后，中间那个点就不要了 */
+
+    /* 作品页标签行：窄屏不换行，改成一行内横滑 */
+    .wk-floor{ flex-wrap:nowrap; overflow-x:auto; gap:20px; padding-bottom:4px;
+      scrollbar-width:none; -ms-overflow-style:none; }
+    .wk-floor::-webkit-scrollbar{ display:none }
+
+    /* 详情层固定标题区：上下堆叠 + 全部左对齐（图5） */
+    .pj-fhead{ flex-direction:column; align-items:flex-start; gap:12px; }
+    .pj-fr{ align-items:flex-start; text-align:left; }
+
+    /* 详情层阅读顺序：截图 → 正文 → 视频（你要的那个） */
+    .pj-side{ display:contents; }
+    .shots{ order:1; }
+    .pj-text{ order:2; }
+    .pj-side .vid{ order:3; }
+  }
+
+  /* 项目目录：索引超出屏幕时可以滚（以后加项目不会被裁） */
+  .pj-index{ overflow-y:auto; min-height:0; max-height:52svh; overscroll-behavior:contain; }
+
+  /* 所有内部滚动区统一用站点那套细滚动条（4px、低对比） */
+  .pj-index, .ab-layer .dl-split, .ab-body{
+    scrollbar-width:thin; scrollbar-color:rgba(198,212,232,.18) transparent; }
+  .pj-index::-webkit-scrollbar,
+  .ab-layer .dl-split::-webkit-scrollbar,
+  .ab-body::-webkit-scrollbar{ width:4px }
+  .pj-index::-webkit-scrollbar-thumb,
+  .ab-layer .dl-split::-webkit-scrollbar-thumb,
+  .ab-body::-webkit-scrollbar-thumb{ background:rgba(198,212,232,.16) }
+
+  /* ============ 窄屏补齐 · 第二批 ============ */
+  @media (max-width:1080px){
+
+    /* ① 作品页标签行：不换行、不压缩，改成一行内横滑 */
+    .wk-floor{ flex-wrap:nowrap; overflow-x:auto; touch-action:pan-x; gap:20px;
+      padding-bottom:4px; scrollbar-width:none; -ms-overflow-style:none; }
+    .wk-floor::-webkit-scrollbar{ display:none }
+    .wk-floor span{ flex:0 0 auto; white-space:nowrap; }
+
+    /* ② 日志页：索引再收一点，正文多露一点（原来 144px / 28%） */
+    .dl-split{ grid-template-columns:1fr;
+      grid-template-rows:minmax(104px,21%) minmax(0,1fr); gap:17px; }
+
+    /* ③ 左上角品牌：英文行缩小，给顶部提示让位，不再互相压住 */
+    #brand .brand-role{ font-size:10px; letter-spacing:.16em; }
+
+    /* ⑤ 详情层固定区：堆叠后把字距收紧 + 行距放开，role/spec 不再断在半截词上 */
+    .pj-fr{ letter-spacing:.1em; line-height:1.8; }
+
+    /* ④ 项目轮播：品类那行跟着分辨率缩小，不再折行 */
+    #pSpec, #pSpecEn{ font-size:.88em; letter-spacing:.08em; }
+  }
 
 </style>
 </head>
@@ -978,7 +1068,7 @@
           <g class="walk">
             <circle class="walk-halo" r="6"/>
             <circle class="walk-dot" r="3"/>
-            <animateMotion id="walk" dur="24s" begin="1.9s" fill="freeze"
+      <animateMotion id="walk" dur="24s" begin="indefinite" fill="freeze"
               calcMode="linear" keyPoints="0;0;1;1;0;0"
               keyTimes="0;0.0208;0.4583;0.4917;0.9292;1"
               path="M141,352 V322 L202.5,240 H397.5 L300,122"/>
@@ -1409,7 +1499,8 @@ draft: true
      规则：该条有英文正文（md_en）才允许切换；英文缺哪一段就回退中文，不会留空。 */
   let LANG = 'cn';                                     /* 用户选的语言（全局，点一次管全站详情页） */
   let SHOWN = 'cn';                                    /* 当前这条实际显示的语言：没英文的条目落回 'cn' */
-  const hasEN = s => !!(s && (s.md_en || s.html_en));   /* 「有英文版」= 有英文正文 */
+  /* 「有英文版」= 这条有英文正文（正文没写英文就不允许切换；标题/角色单独填了也不算） */
+  const hasEN = s => !!(s && (s.md_en || s.html_en));
   const pick  = (cn, en) => (SHOWN === 'en' && en) ? en : cn;
 
   /* 打开某条之前，先算一次"这条该显示什么语言" */
@@ -1724,6 +1815,7 @@ draft: true
     if (REDUCE){ if (planSvg.pauseAnimations) planSvg.pauseAnimations(); return; }
     if (planSvg.pauseAnimations)  planSvg.pauseAnimations();
     planSvg.setCurrentTime(0);
+    const wk = document.getElementById('walk'); if (wk && wk.beginElement) wk.beginElement();
     if (planSvg.unpauseAnimations) planSvg.unpauseAnimations();
   }
   function stopPlan(){
@@ -1827,7 +1919,8 @@ draft: true
       return;
     }
     const W = innerWidth, H = innerHeight;
-    const T = Math.min(168, Math.max(108, H * 0.12));
+    /* 触发深度收窄：手机 56px、桌面约 72–95px（原来 108–168px，太容易抢到附近按钮） */
+    const T = (W < 700) ? 56 : Math.min(120, Math.max(72, H * 0.10));
     const SPAN = 0.36;
     const hot = {
       top:    y < T       && Math.abs(x - W/2) < W * SPAN,
@@ -2058,10 +2151,10 @@ draft: true
         const kids = Array.from(col.children);
         const avail = col.clientHeight - AB_GAP * (kids.length - 1);
         if (avail <= 0) return;
-        const sum = kids.reduce((s,k) => s + (+k.dataset.n), 0);
+        const sum = kids.reduce((s, k) => s + (+k.dataset.n), 0);
         const base = new Map();
         kids.forEach(k => base.set(k, avail * (+k.dataset.n) / sum));
-        const open = kids.filter(k => k.classList.contains('on'))[0];
+        const open = kids.find(k => k.classList.contains('on'));
         if (!open){
           kids.forEach(k => k.style.height = Math.max(AB_MIN, base.get(k)) + 'px');
           return;
@@ -2072,7 +2165,7 @@ draft: true
         openH = Math.min(openH, Math.max(AB_MIN, avail - AB_MIN * others.length));
         const rest = avail - openH;
         const hs = others.map(k => Math.max(AB_MIN, rest * base.get(k) / osum));
-        const used = hs.reduce((a,b) => a + b, 0);
+        const used = hs.reduce((a, b) => a + b, 0);
         if (used > rest) openH = Math.max(AB_MIN, avail - used);
         kids.forEach(k => {
           const i = others.indexOf(k);
@@ -2093,7 +2186,36 @@ draft: true
     });
   }
 
+  /* 窄屏时 about 内容能滚：轮到它滚的时候，别让滚轮去翻页（和日志页同一个套路） */
+  function abWheelGuard(){
+    abouts.forEach(sec => {
+      const ab = sec.querySelector('.ab-body');
+      if (!ab || ab.__guard) return;
+      ab.__guard = 1;
+      ab.addEventListener('wheel', e => {
+        if (ab.scrollHeight <= ab.clientHeight + 1) return;
+        const atTop = ab.scrollTop <= 0, atBot = ab.scrollTop + ab.clientHeight >= ab.scrollHeight - 1;
+        if (!((e.deltaY < 0 && atTop) || (e.deltaY > 0 && atBot))) e.stopPropagation();
+      }, { passive:false });
+    });
+  }
+
+  /* 目录页：索引能滚的时候，别让滚轮翻页（和 about / 日志页同一套路） */
+  (function(){
+    const ix = document.querySelector('.pj-index');
+    if (!ix) return;
+    ix.addEventListener('wheel', e => {
+      if (ix.scrollHeight <= ix.clientHeight + 1) return;
+      const atTop = ix.scrollTop <= 0, atBot = ix.scrollTop + ix.clientHeight >= ix.scrollHeight - 1;
+      if (!((e.deltaY < 0 && atTop) || (e.deltaY > 0 && atBot))) e.stopPropagation();
+    }, { passive:false });
+  })();
+
+  /* 所有实心按钮：指针压在上面时，边缘提示不抢点击（避免误切页） */
+  $$('.ab-btn').forEach(b => b.classList.add('edge-safe'));
+
   function abApply(){
+    abWheelGuard();
     abouts.forEach(sec => {
       sec.querySelectorAll('.bk').forEach(b => {
         const on = b.dataset.id === abOpen;
@@ -2110,7 +2232,8 @@ draft: true
     abLayout();
   }
 
-    abouts.forEach(sec => {
+  /* 关于页交互：点标签 = 切中英文（不收起）；点块 = 展开/收起；点「联系我」= 开全屏层 */
+  abouts.forEach(sec => {
     sec.querySelectorAll('.bk').forEach(b => {
       b.querySelectorAll('.bd .t').forEach((t, ti) => { t.dataset.k = b.dataset.id + ':' + ti; });
       b.addEventListener('click', e => {
@@ -2125,7 +2248,6 @@ draft: true
         abApply();
       });
     });
-
     sec.querySelectorAll('.ab-cta').forEach(b =>
       b.addEventListener('click', () => abLayer.classList.add('on')));
   });
@@ -2180,8 +2302,8 @@ draft: true
     { id:'substance', carousel:true,
       name:'某种物质', name_en:'The Substance',
       date:'2025.11',
-      role:'单人项目 · 关卡策划 · 系统策划 · 程序', role_en:'',
-      spec:'3D · 第三人称解谜 · UE5', spec_en:'',
+      role:'单人项目 · 关卡策划 · 系统策划 · 程序', role_en:'Solo Project · Level Design · Gameplay Design · Programming',
+      spec:'3D · 第三人称解谜 · UE5', spec_en:'3D · Third-Person Puzzle · Unreal Engine 5',
       cover:'images/substance/01.jpg',
       shots:[{src:'images/substance/01.jpg', note:'实机截图'},
              {src:'images/substance/02.jpg', note:'布局设计：一楼'}],
@@ -2193,7 +2315,13 @@ draft: true
 背景设定在一座破损的、建于前末日时代的==科技博物馆==中，馆内收藏有一种被称为「某种物质」的特殊材料——它可在力的作用下==融合放大==，并能借助共振设备==分裂缩小==。玩家身处一个因「科技滥用」而毁灭的后末日世界，进入这座博物馆，目标是取得位于楼顶的镇馆之宝「共振球」。
 
 在装备上原本作为展品展出的小型共振器后，玩家获得「吸取投掷」能力，可操控「某种物质」进行融合与分裂，从而实现物体的放大与缩小。玩家需在博物馆空间内完成一系列解谜与轻度机制性战斗，最终成功取得「共振球」。`,
-      md_en:'## Overview\n\nThis level prototype is built in Unreal Engine 5.6 with a third-person camera.' },
+      md_en:`## Overview
+
+This prototype is developed in Unreal Engine 5.6 and uses a third-person perspective. It is a ==linear, puzzle-centric level==.
+
+Set in a ==dilapidated science and technology museum== built in the pre-apocalyptic era, the museum houses a special material known as “The Substance”—when subjected to force, it can ==fuse to enlarge==, and with the aid of resonance devices, it can ==split to shrink==. The player is in a post-apocalyptic world destroyed by the “misuse of technology.” They enter the museum with the goal of obtaining the museum’s prized treasure, the “Resonance Sphere,” located on the rooftop.
+
+After equipping a small resonator originally on display as an exhibit, the player gains the “Attract and Throw” ability, allowing them to manipulate “The Substance” to fuse and split, thereby enlarging and shrinking objects. The player must complete a series of puzzles and a light, mechanics-driven combat encounter within the museum, and ultimately succeed in obtaining the “Resonance Sphere.”` },
 
     { id:'symbiont', carousel:true,
       name:'赛博蛹生', name_en:'Symbiont',
@@ -2330,14 +2458,15 @@ draft: true
             ${p.name_en ? `<span class="rne">${esc(p.name_en)}</span>` : ''}
           </span>
           ${p.carousel ? '<span class="rm">轮播</span>' : ''}
-          <span class="rs">${esc(p.spec)}<i>·</i>${esc(p.date)}</span>
+          <span class="rs">${esc(p.spec)}<i class="sp">·</i></span>
+          <span class="rd">${esc(p.date)}</span>
         </button>`).join('');
     } else {
       const p = PCAR[pjI];
       if (p){
         pjBg(coverOf(p));
         pset('#pName', p.name); pset('#pNameEn', p.name_en); pset('#pDate', p.date);
-        pset('#pSpec', p.spec); pset('#pSpecEn', p.spec_en);
+        pset('#pSpec', p.spec); pset('#pSpecEn', '');      /* 轮播页不显示英文品类（详情层切换用） */
         $('#pOpen').hidden = false;
         $('#pIndex').innerHTML = '';
       }
