@@ -9,7 +9,7 @@
   @font-face{
     font-family:"Source Han Sans SC";
     font-weight:250 900; font-style:normal; font-display:swap;
-    src:url("fonts/SourceHanSansSC-VF.otf") format("opentype"),
+    src:url("fonts/SourceHanSansSC-VF.woff2") format("woff2"),
         local("Source Han Sans SC"), local("Noto Sans SC"),
         local("HarmonyOS Sans SC"), local("PingFang SC"), local("Microsoft YaHei");
   }
@@ -17,7 +17,7 @@
   @font-face{
     font-family:"Source Han Serif SC";
     font-weight:200 900; font-style:normal; font-display:swap;
-    src:url("fonts/SourceHanSerifSC-VF.otf") format("opentype"),
+    src:url("fonts/SourceHanSerifSC-VF.woff2") format("woff2"),
         local("Source Han Serif SC"), local("Noto Serif SC"), local("Songti SC");
   }
 
@@ -791,11 +791,16 @@
     /* ③ 左上角品牌：英文行缩小，给顶部提示让位，不再互相压住 */
     #brand .brand-role{ font-size:10px; letter-spacing:.16em; }
 
-    /* ⑤ 详情层固定区：堆叠后把字距收紧 + 行距放开，role/spec 不再断在半截词上 */
+    /* ④ 详情层固定区：堆叠后把字距收紧 + 行距放开，role/spec 不再断在半截词上 */
     .pj-fr{ letter-spacing:.1em; line-height:1.8; }
 
-    /* ④ 项目轮播：品类那行跟着分辨率缩小，不再折行 */
+    /* ⑤ 项目轮播：品类那行跟着分辨率缩小，不再折行 */
     #pSpec, #pSpecEn{ font-size:.88em; letter-spacing:.08em; }
+
+    /* ⑥ 技能块：手机上不再由 JS 分配高度，改按内容自然高度（标签保证看得见） */
+    .bk{ height:auto !important; }
+    .bk .sp{ display:none; }
+    .bk.on .bd{ max-height:none; }
   }
 
 </style>
@@ -2146,6 +2151,7 @@ draft: true
   }
 
   function abLayout(){
+    if (innerWidth < 1080) return;          /* 手机上不需要分配高度，交给 CSS */
     abouts.forEach(sec => {
       sec.querySelectorAll('.bcol').forEach(col => {
         const kids = Array.from(col.children);
@@ -2896,7 +2902,7 @@ After equipping a small resonator originally on display as an exhibit, the playe
   ];
 
   const WK = window.WORKS || [];
-  const WKPER = 8;
+  const WKPER = innerWidth < 1080 ? 6 : 8;   /* 手机 6 件 = 3 行×2 列；大屏 8 件 = 2 行×4 列 */
   const WKPREF = ['关卡设计','任务设计','系统设计','叙事设计','UI/UX'];
   const WKSORTED = WK.slice().sort((a, b) => endYM(b.date).localeCompare(endYM(a.date)));  /* 结束年月倒序，新→旧 */
   const WKTAGS = WKPREF.filter(t => WK.some(w => (w.tags||[]).includes(t)))
