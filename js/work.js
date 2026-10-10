@@ -52,7 +52,7 @@
       const first = wkShots(w)[0] || { src:'' };
       const k = (w.tags||[]).concat(w.proj ? [w.proj] : []).join(' · ');
       return `<button class="wk-card" data-id="${w.id}" style="--d:${(i * 0.04).toFixed(2)}s">
-        <span class="wk-thumb"><img src="${esc(first.src)}" alt=""></span>
+        <span class="wk-thumb"><img src="${esc(first.src)}" alt="" loading="lazy" decoding="async"></span>
         <span class="wk-foot"><span class="wk-t" title="${esc(w.title)}">${esc(w.title)}</span><span class="wk-y">${esc(endYM(w.date))}</span></span>
         <span class="wk-k">${esc(k)}</span>
       </button>`;

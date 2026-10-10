@@ -23,7 +23,7 @@
     .map(s => (typeof s === 'string' ? { src:s, note:'' } : { src:(s && s.src) || '', note:(s && s.note) || '' }));
   let pjI = 0, pjShotI = 0, pjFront = 0, pjCur = 0, pjOn = false;
 
-  PJ.forEach(p => { const im = new Image(); im.src = coverOf(p); });
+  /* v1.8.3：取消首页初始化时一次性预加载全部项目封面，进入项目页再按需请求 */
 
   function pjBg(src){
     const next = pjFront === 0 ? pjBgB : pjBgA, prev = pjFront === 0 ? pjBgA : pjBgB;

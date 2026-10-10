@@ -1,3 +1,23 @@
+  /* 将外部日志数据恢复为旧版日志解析器熟悉的 DOM 结构 */
+  if (!Array.isArray(window.YOLANDA_LOGS)) throw new Error('data/logs.js 未加载');
+  const logStore = $('#logStore');
+  window.YOLANDA_LOGS.forEach(entry => {
+    const article = document.createElement('article');
+    article.id = entry.id;
+    const cn = document.createElement('script');
+    cn.type = 'text/markdown';
+    cn.textContent = entry.markdown || '';
+    article.appendChild(cn);
+    if (entry.markdown_en) {
+      const en = document.createElement('script');
+      en.type = 'text/markdown';
+      en.dataset.lang = 'en';
+      en.textContent = entry.markdown_en;
+      article.appendChild(en);
+    }
+    logStore.appendChild(article);
+  });
+
   /* ============ 日志数据 ============ */
   const DEV = location.protocol === 'file:' || location.hash === '#dev';
   const posts = $$('#logStore article').map(a => {

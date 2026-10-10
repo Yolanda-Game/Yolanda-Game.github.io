@@ -6,6 +6,12 @@
   const planWrap = $('#planWrap'), planSvg = planWrap.querySelector('svg');
   const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* 在克隆关于页之前，填充外部维护的关于页内容 */
+  if (!window.YOLANDA_ABOUT) throw new Error('data/about.js 未加载');
+  document.querySelector('[data-tpl="about"] .ab-body').innerHTML = window.YOLANDA_ABOUT.body;
+  document.querySelector('#abLayer .contact').innerHTML = window.YOLANDA_ABOUT.contact;
+  document.querySelector('#abCV').innerHTML = window.YOLANDA_ABOUT.cv;
+
   ['blog','about'].forEach(kind => {
     const tpl = document.querySelector('[data-tpl="' + kind + '"]');
     [1,2].forEach(c => {
@@ -94,66 +100,48 @@
     if (e.key === 'Escape')     home();
   });
 
+  /* 内部滚动区域和交互控件不触发空间切页 */
+  const NAV_SCROLL_GUARD = '.pj-index, .ab-body, .dl-idx, .dl-pcol, .wk-floor, .pj-pager, .ab-layer, .pj-layer, .light-layer';
+  const NAV_TOUCH_GUARD = NAV_SCROLL_GUARD + ', button, a, input, textarea, select, label, #minimap';
+
   addEventListener('wheel', e => {
     if (abLayer.classList.contains('on')) return;
-
-    // 项目索引拥有独立滚动权限
-    // 鼠标位于索引内时，不允许触发整页切换
-    if (e.target instanceof Element &&
-        e.target.closest('.pj-index')) {
-      return;
-    }
-
-    // 其余区域保持原来的页面导航功能
+    if (e.target instanceof Element && e.target.closest(NAV_SCROLL_GUARD)) return;
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
       e.deltaX > 12 ? step('right') : step('left');
     } else {
-      e.deltaY > 12 ? step('down') :
-      e.deltaY < -12 ? step('up') : 0;
+      e.deltaY > 12 ? step('down') : e.deltaY < -12 ? step('up') : 0;
     }
   }, { passive:true });
 
-  
-  let sx = 0, sy = 0;
-  let touchInProjectIndex = false;
-
+  let sx = 0, sy = 0, touchBlockNavigation = false;
   addEventListener('touchstart', e => {
-    if (e.touches.length !== 1) return;
-
+    if (e.touches.length !== 1) {
+      touchBlockNavigation = true;
+      return;
+    }
     sx = e.touches[0].clientX;
     sy = e.touches[0].clientY;
-
-    // 记录手指是否从项目索引区域开始滑动
-    touchInProjectIndex =
-      e.target instanceof Element &&
-      !!e.target.closest('.pj-index');
+    touchBlockNavigation = e.target instanceof Element &&
+      !!e.target.closest(NAV_TOUCH_GUARD);
   }, { passive:true });
 
   addEventListener('touchend', e => {
-    if (abLayer.classList.contains('on')) return;
-
-    // 从项目索引开始的滑动，只处理内部滚动
-    if (touchInProjectIndex) {
-      touchInProjectIndex = false;
-      return;
-    }
-
-    // 多指操作不触发切页
+    // 只有全部手指离开后才可能触发全局导航
     if (e.touches.length > 0) return;
-
-    const dx = e.changedTouches[0].clientX - sx;
-    const dy = e.changedTouches[0].clientY - sy;
-
+    const blocked = touchBlockNavigation;
+    touchBlockNavigation = false;
+    if (blocked || abLayer.classList.contains('on')) return;
+    const touch = e.changedTouches[0];
+    if (!touch) return;
+    const dx = touch.clientX - sx, dy = touch.clientY - sy;
     if (Math.max(Math.abs(dx), Math.abs(dy)) < 50) return;
-
     Math.abs(dx) > Math.abs(dy)
       ? (dx > 0 ? step('left') : step('right'))
       : (dy > 0 ? step('up') : step('down'));
   }, { passive:true });
 
-  addEventListener('touchcancel', () => {
-    touchInProjectIndex = false;
-  }, { passive:true });
+  addEventListener('touchcancel', () => { touchBlockNavigation = false; }, { passive:true });
 
   brand.onclick = home;
 

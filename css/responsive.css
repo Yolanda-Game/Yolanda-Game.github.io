@@ -84,3 +84,10 @@
       opacity:1 !important; margin-top:12px !important; }
   }
 
+
+/* v1.8.3 touch guards：内部纵向滚动与轮播按钮的触摸优先权 */
+.ab-body, .ab-layer .dl-split, .dl-idx, .dl-pcol {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+#pPrev, #pNext { touch-action: manipulation; }
