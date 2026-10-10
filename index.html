@@ -1354,8 +1354,10 @@
 <div class="edge right"  id="eRight"></div>
 
 <!-- ============ 日志数据源（不参与页面克隆） ============
-     一条日志 = 一个 <article>，里面只放一段 Markdown。
-     --- 之间是元信息：date / title / time / tag / draft。
+     一条日志 = 一个 <article>。
+     必须包含中文 Markdown；可以另加一段英文 Markdown。
+     中文 Markdown 顶部用 --- 包住元信息：
+     date / title / title_en / time / tag / draft。
 -->
 <div id="logStore" hidden>
 
@@ -1522,8 +1524,14 @@ draft: true
 (function(){
   const $ = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
-  const p2 = n => String(n).padStart(2,'0');
-  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const p2 = n => String(n).padStart(2,'0'); 
+  const esc = s => String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
   /* 详情层"点空白关闭"的例外名单（项目层 / 作品层共用） */
   const NO_CLOSE = '.dl-share, .lg-sw, .pn, .post, .shot-box, .vid, .pl, .vl, .pj-ttl, .pj-ttl-en, .pj-role, .pj-sub, a, iframe';
 
@@ -2281,17 +2289,6 @@ draft: true
     });
   }
 
-  /* 目录页：索引能滚的时候，别让滚轮翻页（和 about / 日志页同一套路） */
-  (function(){
-    const ix = document.querySelector('.pj-index');
-    if (!ix) return;
-    ix.addEventListener('wheel', e => {
-      if (ix.scrollHeight <= ix.clientHeight + 1) return;
-      const atTop = ix.scrollTop <= 0, atBot = ix.scrollTop + ix.clientHeight >= ix.scrollHeight - 1;
-      if (!((e.deltaY < 0 && atTop) || (e.deltaY > 0 && atBot))) e.stopPropagation();
-    }, { passive:false });
-  })();
-
   /* 所有实心按钮：指针压在上面时，边缘提示不抢点击（避免误切页） */
   $$('.ab-btn').forEach(b => b.classList.add('edge-safe'));
 
@@ -2385,7 +2382,6 @@ draft: true
       date:'2025.11',
       role:'单人项目 · 关卡策划 · 系统策划 · 程序', role_en:'Solo Project · Level Design · Gameplay Design · Programming',
       spec:'3D · 第三人称解谜 · UE5', spec_en:'3D · Third-Person Puzzle · Unreal Engine 5',
-      cover:'images/substance/01.jpg',
       shots:[{src:'images/substance/01.jpg', note:'实机截图'},
              {src:'images/substance/02.jpg', note:'布局设计：一楼'}],
       videos:[{ label:'实机演示', src:'bilibili:BV1JFHX6zEoW' }],
@@ -2409,7 +2405,6 @@ After equipping a small resonator originally on display as an exhibit, the playe
       date:'2025.05 – 2025.09',
       role:'团队项目 · 主策划 · 系统策划 · 任务策划 · 关卡策划 · 程序 · 项目管理', role_en:'',
       spec:'3D · 第三人称射击潜行 · UE5', spec_en:'',
-      cover:'images/symbiont/01.jpg',
       shots:[{src:'images/symbiont/01.jpg', note:'实机截图'},
              {src:'images/symbiont/02.jpg', note:'实机截图'}],
       videos:[{ label:'预告短片', src:'bilibili:BV1PTHS6ME6g' },
@@ -2431,7 +2426,6 @@ After equipping a small resonator originally on display as an exhibit, the playe
       date:'2024.09 – 2024.11',
       role:'团队项目 · 策划 · 美术', role_en:'',
       spec:'桌游 · 多人合作策略', spec_en:'',
-      cover:'images/shelter/01.jpg',
       shots:[{src:'images/shelter/01.jpg', note:'试玩现场'},
              {src:'images/shelter/02.jpg', note:'手册封面'}],
       videos:[],
@@ -2451,7 +2445,6 @@ After equipping a small resonator originally on display as an exhibit, the playe
       date:'2025.03 – 2025.05',
       role:'团队项目 · 系统策划 · 程序', role_en:'',
       spec:'VR · 第一人称侦探恐怖 · UE5', spec_en:'',
-      cover:'images/counter-ghost/01.jpg',
       shots:[{src:'images/counter-ghost/01.jpg', note:'实机截图'},
              {src:'images/counter-ghost/02.jpg', note:'关卡场景'}],
       videos:[],
@@ -2472,7 +2465,6 @@ After equipping a small resonator originally on display as an exhibit, the playe
       date:'2024.11 – 2025.03',
       role:'团队项目 · 关卡策划 · 系统策划 · 程序', role_en:'',
       spec:'2D · 俯视角解谜潜行 · Unity', spec_en:'',
-      cover:'images/powerup/01.jpg',
       shots:[{src:'images/powerup/01.jpg', note:'开始界面'},
              {src:'images/powerup/02.jpg', note:'关卡场景'}],
       videos:[],
@@ -2977,7 +2969,7 @@ After equipping a small resonator originally on display as an exhibit, the playe
   ];
 
   const WK = window.WORKS || [];
-  const WKPER = innerWidth < 1180 ? 6 : 8;   /* <1180 时网格是 3 列/2 列 → 每页 6 件才刚好铺满 */
+  let WKPER = innerWidth < 1180 ? 6 : 8;  /* 作品每页数量：宽屏 8 件，窄屏 6 件；窗口跨越断点时同步更新 */
   const WKPREF = ['关卡设计','任务设计','系统设计','叙事设计','UI/UX'];
   const WKSORTED = WK.slice().sort((a, b) => endYM(b.date).localeCompare(endYM(a.date)));  /* 结束年月倒序，新→旧 */
   const WKTAGS = WKPREF.filter(t => WK.some(w => (w.tags||[]).includes(t)))
@@ -2985,6 +2977,17 @@ After equipping a small resonator originally on display as an exhibit, the playe
 
   const wkSec = $('#wkSec'), wkLayer = $('#wkLayer');
   let wkFilter = null, wkPage = 1, wkCur = null, wkShot = 0;
+
+  // 当窗口宽度跨过布局断点时，重新计算每页数量
+  addEventListener('resize', () => {
+    const nextPer = innerWidth < 1180 ? 6 : 8;
+
+    if (nextPer !== WKPER) {
+      WKPER = nextPer;
+      wkPage = 1;
+      wkRender();
+    }
+  });
 
   const wkList = () => wkFilter ? WKSORTED.filter(w => (w.tags||[]).includes(wkFilter)) : WKSORTED;
   /* 截图：没写 shots 就去猜 images/<id>/01.jpg（跟封面同一张） */
