@@ -1,4 +1,4 @@
-/* v1.8.3 关于页内容：保留原始 HTML 结构和样式类名。 */
+/* 关于页内容源：保留 HTML 结构、类名与 data-id，以兼容 js/about.js 的交互逻辑。 */
 window.YOLANDA_ABOUT = {
   body: `
           <div class="ab-left">

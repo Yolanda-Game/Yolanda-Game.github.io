@@ -1,4 +1,5 @@
-  /* 将外部日志数据恢复为旧版日志解析器熟悉的 DOM 结构 */
+  /* 兼容桥接层：把外部日志数据暂时转为隐藏 DOM，再交由既有解析器处理。
+     v1.9 统一内容模型之前不要删除。 */
   if (!Array.isArray(window.YOLANDA_LOGS)) throw new Error('data/logs.js 未加载');
   const logStore = $('#logStore');
   window.YOLANDA_LOGS.forEach(entry => {

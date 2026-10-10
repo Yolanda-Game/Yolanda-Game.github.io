@@ -85,7 +85,7 @@
   }
 
 
-/* v1.8.3 touch guards：内部纵向滚动与轮播按钮的触摸优先权 */
+/* 触摸滚动保护：内部纵向滚动与轮播按钮优先于全局空间切页 */
 .ab-body, .ab-layer .dl-split, .dl-idx, .dl-pcol {
   touch-action: pan-y;
   -webkit-overflow-scrolling: touch;

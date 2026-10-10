@@ -23,7 +23,7 @@
     .map(s => (typeof s === 'string' ? { src:s, note:'' } : { src:(s && s.src) || '', note:(s && s.note) || '' }));
   let pjI = 0, pjShotI = 0, pjFront = 0, pjCur = 0, pjOn = false;
 
-  /* v1.8.3：取消首页初始化时一次性预加载全部项目封面，进入项目页再按需请求 */
+  /* 性能约定：项目封面进入对应轮播时按需请求，避免首页加载全部图片。 */
 
   function pjBg(src){
     const next = pjFront === 0 ? pjBgB : pjBgA, prev = pjFront === 0 ? pjBgA : pjBgB;
