@@ -13,7 +13,7 @@
 
   function renderBlog(sec){
     const q = s => sec.querySelector(s);
-    const L = filter ? posts.filter(p => p.tag === filter) : posts;
+    const L = filter ? posts.filter(p => p.tags.includes(filter)) : posts;
     q('.dlCount').textContent = '共 ' + L.length + ' 条';
     q('.dlLast').textContent  = L.length ? '更新于 ' + L[0].dstr : '暂无日志';
 
@@ -92,12 +92,13 @@
     } else {
       q('.dl-pmeta').hidden = false;
       q('.dlDate').textContent = sel.dstr;
-      q('.dlTag').textContent = '#' + sel.tag;
+      q('.dlTag').textContent = sel.tags.map(t => '#' + t).join(' · ');
       setTtl(q('.dl-pttl'), null, sel.title, sel.title_en);
       q('.dl-body').innerHTML = pick(sel.html, sel.html_en);
       langSw(q('[data-lang-sw]'), hasEN(sel));
       pcol.scrollTop = 0;
       fixMedia(q('.dl-body'));
+      mediaLogGallery(q('.dl-body'), sel);
       const on = q('.dl-idx .it.on'), box = q('.dl-idx');
       if (on && box){
         const a = on.getBoundingClientRect(), b = box.getBoundingClientRect();

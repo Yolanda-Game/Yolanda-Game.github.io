@@ -390,4 +390,20 @@
   .ab-body:has(.bk.on) .blocks,
   .ab-body:has(.bk.on) .bcol{ min-height:auto; }
 
-  
+/* v1.9.1 发布前修复：图片与视频小标题、轮播容器及全图逐层关闭 */
+.light-layer.closing{ opacity:0; pointer-events:auto; }
+.shot-note,.media-caption{ user-select:text; cursor:text; }
+.media-video-carousel{ margin-top:clamp(18px,2.2vh,26px); min-width:0; }
+.media-video-stage{ aspect-ratio:16/9; position:relative; background:var(--bg2); border:1px solid var(--line); overflow:hidden; }
+.pj-side .media-video-stage .vid{ margin:0; height:100%; width:100%; border:0; }
+.media-video-bar,.media-gallery-bar{ min-width:0; }
+.media-video-bar .shot-note,.media-gallery-bar .shot-note{ flex:1 1 auto; min-width:0; overflow-wrap:anywhere; letter-spacing:.06em; }
+.media-index{ white-space:nowrap; flex:0 0 auto; }
+.media-video-bar .pn,.media-gallery-bar .pn{ flex:0 0 34px; }
+.media-video-bar .pn:disabled,.media-gallery-bar .pn:disabled{ opacity:.28; cursor:default; }
+.post .media-gallery{ display:flex; flex-direction:column; width:100%; min-width:0; margin:8px 0; }
+.post .media-gallery-stage{ width:100%; aspect-ratio:16/9; min-height:0; overflow:hidden; border:1px solid var(--line); background:var(--bg2); display:flex; align-items:center; justify-content:center; }
+.post .media-gallery-stage > img{ width:100%; height:100%; max-height:none; object-fit:contain; border:0; background:transparent; cursor:zoom-in; }
+.post .media-gallery-stage > .vid{ margin:0; width:100%; height:100%; border:0; min-height:0; }
+.post .media-gallery-stage > .phbox{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
+.post .media-gallery-intro{ margin:0 0 clamp(15px,2vh,26px); }

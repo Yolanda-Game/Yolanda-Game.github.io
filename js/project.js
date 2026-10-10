@@ -105,7 +105,7 @@
     const img = new Image(); img.alt = sh.note || ''; img.src = sh.src;
     img.onerror = () => { box.innerHTML = '<div class="phbox">图片未找到：' + esc(sh.src) + '</div>'; };
     box.appendChild(img);
-    pset('#mShotNote', sh.note);
+    pset('#mShotNote', mediaCaption(sh, 'image'));
     $('#mShotIdx').textContent = p2(pjShotI + 1) + ' / ' + p2(list.length);
   }
 
@@ -118,6 +118,9 @@
     pset('#mSpec', pick(p.spec, p.spec_en));
     $('#mIntro').innerHTML = md(pick(p.md, p.md_en) || '');
     fixMedia($('#mIntro'));
+    const imgNote = shotsOf(p)[pjShotI] || shotsOf(p)[0];
+    pset('#mShotNote', mediaCaption(imgNote, 'image'));
+    mediaRefreshCaptions(pjLayer);
     langSw($('#mLang'), hasEN(p));
   }
 
@@ -127,17 +130,14 @@
     pjLangPaint();
     pjShotI = 0; pjShotPaint();
     const side = $('#mSide');
-    side.querySelectorAll('.vid').forEach(v => v.remove());
-    (p.videos || []).filter(v => v && v.src).forEach(v => {
-      const d = document.createElement('div');
-      d.className = 'vid';
-      d.dataset.src = v.src;
-      d.innerHTML = '<span class="pl">▶</span><span class="vl">' + esc(v.label || '视频') + '</span>';
-      side.appendChild(d);
-    });
+    side.querySelectorAll('.media-video-carousel, .vid').forEach(el => el.remove());
+    mediaVideoCarousel(side, p.videos || [], 'm');
     pjLayer.classList.add('on');
     pjSec.classList.add('paused');
     $('#pjCol').scrollTop = 0;
     fixMedia(pjLayer);   /* 复用日志那套：图找不到有兜底、视频点一下原地播放 */
   }
-  function pjClose(){ pjLayer.classList.remove('on'); pjSec.classList.remove('paused'); }
+  function pjClose(){
+    pjLayer.classList.remove('on'); pjSec.classList.remove('paused');
+    pjLayer.querySelectorAll('.media-video-stage iframe').forEach(f => f.remove());
+  }

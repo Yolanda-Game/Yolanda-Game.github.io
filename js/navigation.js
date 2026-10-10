@@ -101,7 +101,7 @@
   });
 
   /* 内部滚动区域和交互控件不触发空间切页 */
-  const NAV_SCROLL_GUARD = '.pj-index, .ab-body, .dl-idx, .dl-pcol, .wk-floor, .pj-pager, .ab-layer, .pj-layer, .light-layer';
+  const NAV_SCROLL_GUARD = '.pj-index, .dl-floor, .ab-body, .dl-idx, .dl-pcol, .wk-floor, .pj-pager, .ab-layer, .pj-layer, .light-layer';
   const NAV_TOUCH_GUARD = NAV_SCROLL_GUARD + ', button, a, input, textarea, select, label, #minimap';
 
   addEventListener('wheel', e => {

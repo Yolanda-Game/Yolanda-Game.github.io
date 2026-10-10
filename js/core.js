@@ -9,7 +9,7 @@
     .replace(/'/g, '&#39;');
 
   /* 详情层"点空白关闭"的例外名单（项目层 / 作品层共用） */
-  const NO_CLOSE = '.dl-share, .lg-sw, .pn, .post, .shot-box, .vid, .pl, .vl, .pj-ttl, .pj-ttl-en, .pj-role, .pj-sub, a, iframe';
+  const NO_CLOSE = '.dl-share, .lg-sw, .pn, .post, .shot-box, .shot-bar, .shot-note, .media-video-carousel, .media-gallery, .media-caption, .pj-side, .vid, .pl, .vl, .pj-ttl, .pj-ttl-en, .pj-role, .pj-sub, a, iframe';
 
   /* ============ 中英切换 ============
      只切详情页（日志 / 项目 / 作品）里的正文与标题；界面文案（"项目详情""关闭""共 N 件"）不动。

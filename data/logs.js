@@ -1,162 +1,267 @@
-/* 日志内容源（公开文件）：使用 JS 模板字符串保存 Markdown。
-   后续手动编辑时，正文里的反引号与 ${...} 必须正确转义。
-   draft: true 只隐藏展示，不等于保密。 */
+/* v1.9.1：日志是唯一的内容与媒体来源。
+   tags 多选：项目/作品 + 介绍 + 其他任意标签；进度已统一为更新。
+   subject 指向 project/<id> 或 work/<id>；详情页从介绍日志自动派生。
+   初次迁移的 YYYY-MM 为原项目结束月份（归档月份），不是虚构的发布日期。
+   draft:true 将隐藏日志及其唯一的介绍详情。 */
 window.YOLANDA_LOGS = [
   {
     id: "log-2026-09-24",
-    markdown: `
----
-date: 2026-09-24
-tag: 说明
-title: 日志怎么写 · Markdown 规则
-draft: true
----
-这是写给自己的一份速查：**一条日志的最小结构**、**支持哪些格式**、**哪些不支持**。它标了 \`draft: true\`，所以访客看不到——最后一段说明了怎么解锁、以及它为什么不是"保密"。
-
-> [!note] 一条日志的最小结构
-> 一条日志放在 \`data/logs.js\` 中，Markdown 正文顶部仍然用 \`---\` 包住元信息。放在文件哪个位置都行（排序看日期、不看先后），缩进也无所谓。
-
-## 元信息
-
-| 字段 | 必填 | 说明 |
-|---|---|---|
-| date | 必填 | \`YYYY-MM-DD\`，**月和日要补零**（排序按字符串比大小：写 \`2026-09-02\`，不要写 \`2026-9-2\`） |
-| title | 必填 | 帖子标题 |
-| time | 可选 | 同一天发多条时才写，如 \`21:40\`，用来排序 |
-| tag | 可选 | 不写就算「进度」 |
-| draft | 可选 | 写 \`true\` 就隐藏：不计入条数、不进索引、连分享链接都点不开 |
-
-日志对象的 **id 只用于做链接**：单条写 \`log-2026-09-24\`；同一天多条再加后缀 \`log-2026-09-24-1\` / \`-2\`。
-
-排序 = **date + time**，所以文件里谁先谁后不影响顺序。
-
-## 行内格式
-
-- \`**加粗**\` → **加粗**（变亮 + 加重）
-- \`*斜体*\` → *斜体*（中文是浏览器合成倾斜，不是真斜体，别用太多）
-- \`~~删除线~~\` → ~~删除线~~（线更粗更清楚，做完的事就这么划掉）
-- \`==高亮==\` → ==高亮==（下划线样式，跨行也自然）
-- 行内代码：用一对反引号包住 → \`npm run dev\`
-- \`[文字](网址)\` → [文字](https://example.com)
-- 裸网址会自动变链接 → https://example.com
-
-可以叠着用：~~**加粗的删除线**~~、*斜体里的**加粗***。
-
-## 行级格式
-
-- \`## 小标题\` → 宋体 23px，用来切大段
-- \`### 小标题\` → 无衬线 15px，用来切小段
-- \`- 要点\` 与 \`1. 要点\` → 两种列表，有序列表的序号由站点自动排
-- \`> 引用\` → 左侧一条竖线 + 灰字
-- \`---\` 单独一行 → 分隔线
-- 表格 → 上面那张表就是写法
-- 代码块 → 上下各一行三个反引号，太宽可以横向滚动
-
-**段落与换行**：空一行 = 新一段；**单个回车 = 换行不换段**。
-
-下面这两行只按了一次回车，
-所以它们会连成一段。
-
-引用可以带出处：
-
-> 见贤思齐焉，见不贤而内自省也。
-> —— 《论语 · 里仁》（公版）
-
-## 标注框（七种）
-
-**颜色代表语气，图标和标签代表类型**：
-
-| 类型 | 颜色 | 什么时候用 |
-|---|---|---|
-| note | 粉紫 \`#d79ad0\` | 随手记、补充说明 |
-| abstract | 靛紫 \`#aca5ea\` | 概括这一篇讲了什么 |
-| info | 天青 \`#8ab5e6\` | 中性的事实补充 |
-| todo | 薄荷绿 \`#8ed4a4\` | 还没做的事 |
-| tip | 柠黄 \`#cdd97e\` | 能省时间的小招 |
-| example | 青绿 \`#7fcdd0\` | 给一个具体样本 |
-| warn | 琥珀 \`#e8b07a\` | 会踩的坑 |
-
-写法是 \`> [!类型] 可选的标题\`，之后**每一行都以 \`> \` 开头**。\`:::note 标题\` 这种写法也支持，但结尾要单独一行 \`:::\`。
-
-> [!example] 标注框里能放什么
-> 段落、\`## 小标题\`、要点列表、引用、**表格**、**图片**、**代码块** —— 全都能放。
-> 规则只有一条：**每一行都要以 \`> \` 开头**；标注里的空行就写单独一个 \`>\`。代码块也一样，连围栏那行前面都要加 \`> \`。
->
-> | 三样东西 | 一样都不能少 |
-> |---|---|
-> | 安全区 | 先让玩家在没压力的地方学会 |
-> | 新变量 | 一次只加一个 |
-> | 回收 | 后面必须用得上 |
->
-> ![图注照常写在方括号里](images/log/example.jpg)
->
-> ### 小标题也能放
-> 代码块同样可以。
-
-## 图片
-
-- \`![图注](images/log/example.jpg)\` → 图**恒定与正文同宽**；竖图、超高图自动限高居中
-- \`![图注](images/log/example.jpg){w=60%}\` → 按比例宽 + 居中（小图、方图用这个）
-- \`{w=...}\` 里的数字随便填，30%、80% 都行；图注取方括号里的文字
-- 图片统一放 \`images/log/\`，文件名用**英文小写 + 连字符**
-- **图找不到时** → 变成写着路径的占位框，永远不会出现破图
-
-## 视频与嵌入
-
-- \`:::video bilibili:BVxxxxxxxxxx 说明文字\` → 封面 + 播放键，点击原地换成播放器
-- \`:::video youku:视频ID 说明文字\` → 同上（优酷）
-- \`:::video https://... 说明文字\` → 任意可嵌入网址
-- \`:::embed 网址\` → 站内嵌入别的网站内容
-- 这几种**结尾都要单独一行 \`:::\`**
-
-## 逃生舱：原样放行 HTML
-
-以 \`<\` 开头的行会被原样当作 HTML 放行，所以要塞自定义排版，直接在正文里写那一行 HTML 就行：例如开一个自定的方框，就写一行 \`<div style="border:1px solid rgba(240,162,196,.35);padding:20px">\`，接着写内容，最后一行写 \`</div>\`，前后各空一行。
-
-**代价**：它完全不跟着站点样式走 —— 颜色、间距、字号都要自己管，所以只在上面的办法都做不到时才用。
-
-## 别踩的坑
-
-> [!warn] 从 Obsidian 粘贴前记住这几条
-> 图片用 \`![](路径)\`，不要用 \`![[图片]]\`；\`[[双链]]\` 不识别；\`- [ ]\` 待办框不支持（用 \`- ~~做完的事~~\` 代替）；脚注、mermaid、数学公式都没有。
-> **不要用反引号去演示反引号**（比如双层反引号包一层），会被解析器吃掉、漏出多余符号。
-> 表格单元格里不能换行、也不能出现竖线；标注不要套标注（能跑，但很难看）。
-
-## 左栏目录与链接
-
-- 左栏按 **年 → 月 → 帖子** 排列，**没写过的月份不会出现**；年份和月份都能点着收起
-- 默认展开"最新那年 + 最新那月"，默认选中最新一条
-- 日期显示自动补零（\`09.02\`）
-- 顶部标签只显示"有用过的"；**新写的标签会自动出现在这一行**（所以看到一个陌生标签 = 你打错字了），建议总数控制在 5–7 个
-- 右上"复制链接"给出这一条的独立地址（\`index.html#log-...\`），粘到浏览器里会**直接定位到这一条**
-
-## 隐私与脱敏
-
-- 日志里**不写**未公开的项目内容、数值、美术资产
-- 工作相关的东西一律抽象化：只写"怎么想的"，不写"完整配方"
-
-## 写完一条日志的动作
-
-1. 在 \`data/logs.js\` 中复制一条日志记录
-2. 改 \`date\` / \`tag\` / \`title\`
-3. 把正文粘进去（在别处写好的 Markdown 直接贴）
-4. 存盘 —— 索引、年份、条数、更新日期、分享链接、日期补零全部自动
-
----
-
-## 关于这条帖子本身
-
-> [!tip] 它是锁着的
-> 它标了 \`draft: true\`，所以**线上访客看不到**：不计入"共 N 条"、不进左栏索引、\`#说明\` 标签也不会出现，连锚点都点不开。
-> **你自己怎么看**：本地双击 \`index.html\`（\`file://\`）就会显示；在线上想看，就在网址后面手动加 \`#dev\`。
-
-> [!warn] 它不是"保密"
-> 正文就在公开仓库的 \`data/logs.js\` 里，"查看网页源代码"照样读得到，仓库也是公开的。**真正敏感的东西不要放进这个站**，那部分留在线下。
->
-> 想把这条也公开（比如做成"这个站是怎么做出来的"）？把 \`draft: true\` 这一行删掉就行。
-
-> [!info] 这一条只管日志
-> 站点层面的规则（配色、字体、导航、部署、文件结构）不在这里，另有一份《全站规则说明》。
-    `
-  }
+    date: "2026-09-24",
+    title: "日志怎么写 · Markdown 规则",
+    tags: ["说明"],
+    draft: true,
+  },
+  {
+    id: "log-project-substance",
+    date: "2025-11",
+    title: '某种物质',
+    title_en: 'The Substance',
+    tags: ["项目","介绍"],
+    subject: "project/substance",
+    period: '2025.11',
+    spec: '3D · 第三人称解谜 · UE5',
+    spec_en: '3D · Third-Person Puzzle · Unreal Engine 5',
+    role: '单人项目 · 关卡策划 · 系统策划 · 程序',
+    role_en: 'Solo Project · Level Design · Gameplay Design · Programming',
+    shots: [{src:'images/substance/01.jpg', note:'实机截图'},
+             {src:'images/substance/02.jpg', note:'布局设计：一楼'}],
+    videos: [{ label:'实机演示', src:'bilibili:BV1JFHX6zEoW' }],
+  },
+  {
+    id: "log-project-symbiont",
+    date: "2025-09",
+    title: '赛博蛹生',
+    title_en: 'Symbiont',
+    tags: ["项目","介绍"],
+    subject: "project/symbiont",
+    period: '2025.05 – 2025.09',
+    spec: '3D · 第三人称射击潜行 · UE5',
+    spec_en: '',
+    role: '团队项目 · 主策划 · 系统策划 · 任务策划 · 关卡策划 · 程序 · 项目管理',
+    role_en: '',
+    shots: [{src:'images/symbiont/01.jpg', note:'实机截图'},
+             {src:'images/symbiont/02.jpg', note:'实机截图'},
+             {src:'images/symbiont/05.jpg', note:'演示截图'}],
+    videos: [{ label:'预告短片', src:'bilibili:BV1PTHS6ME6g' },
+              { label:'实机演示', src:'bilibili:BV1AgHS6KEiH' }],
+  },
+  {
+    id: "log-project-shelter",
+    date: "2024-11",
+    title: '避难所',
+    title_en: 'Shelter',
+    tags: ["项目","介绍"],
+    subject: "project/shelter",
+    period: '2024.09 – 2024.11',
+    spec: '桌游 · 多人合作策略',
+    spec_en: '',
+    role: '团队项目 · 策划 · 美术',
+    role_en: '',
+    shots: [{src:'images/shelter/01.jpg', note:'试玩现场'},
+             {src:'images/shelter/02.jpg', note:'手册封面'}],
+    videos: [],
+  },
+  {
+    id: "log-project-counter-ghost",
+    date: "2025-05",
+    title: '灵单猎人',
+    title_en: 'Counter Ghost',
+    tags: ["项目","介绍"],
+    subject: "project/counter-ghost",
+    period: '2025.03 – 2025.05',
+    spec: 'VR · 第一人称侦探恐怖 · UE5',
+    spec_en: '',
+    role: '团队项目 · 系统策划 · 程序',
+    role_en: '',
+    shots: [{src:'images/counter-ghost/01.jpg', note:'实机截图'},
+             {src:'images/counter-ghost/02.jpg', note:'关卡场景'}],
+    videos: [],
+  },
+  {
+    id: "log-project-powerup",
+    date: "2025-03",
+    title: '喵力全开',
+    title_en: 'Power Up',
+    tags: ["项目","介绍"],
+    subject: "project/powerup",
+    period: '2024.11 – 2025.03',
+    spec: '2D · 俯视角解谜潜行 · Unity',
+    spec_en: '',
+    role: '团队项目 · 关卡策划 · 系统策划 · 程序',
+    role_en: '',
+    shots: [{src:'images/powerup/01.jpg', note:'开始界面'},
+             {src:'images/powerup/02.jpg', note:'关卡场景'}],
+    videos: [],
+  },
+  {
+    id: "log-work-quest-for-valor",
+    date: "2025-02",
+    title: '勇者征途：淘金热',
+    title_en: 'Quest for Valor: Gold Rush',
+    tags: ["作品","介绍"],
+    subject: "work/quest-for-valor",
+    period: '2024.12 – 2025.02',
+    spec: '3D · 第三人称动作冒险角色扮演 · UE4',
+    spec_en: '',
+    proj: '',
+    workTags: ['关卡设计','任务设计'],
+    shots: [{src:'images/quest-for-valor/01.jpg', note:'实机截图'},
+             {src:'images/quest-for-valor/02.jpg', note:'文档截图'},
+             {src:'images/quest-for-valor/03.jpg', note:'节拍表'}],
+    videos: [{ label:'实机演示', src:'bilibili:BV1mfHU6kEmX' }],
+  },
+  {
+    id: "log-work-lost-champions",
+    date: "2025-04",
+    title: '失落英杰：谜境三角',
+    title_en: 'The Lost Champions: Triune Quest',
+    tags: ["作品","介绍"],
+    subject: "work/lost-champions",
+    period: '2025.04',
+    spec: '3D · 第三人称解密 · UE4',
+    spec_en: '',
+    proj: '',
+    workTags: ['关卡设计'],
+    shots: [{src:'images/lost-champions/01.jpg', note:'实机截图'}],
+    videos: [{ label:'实机演示', src:'bilibili:BV1cjHS6wEwx' }],
+  },
+  {
+    id: "log-work-combat-sim",
+    date: "2025-04",
+    title: '模拟作战：高塔撤离行动',
+    title_en: 'Combat Sim: Tower Evacuation Operation',
+    tags: ["作品","介绍"],
+    subject: "work/combat-sim",
+    period: '2025.03 – 2025.04',
+    spec: '3D · 第三人称射击 · UE4',
+    spec_en: '',
+    proj: '',
+    workTags: ['关卡设计'],
+    shots: [{src:'images/combat-sim/01.jpg', note:'实机截图'}],
+    videos: [{ label:'实机演示', src:'bilibili:BV1cVHS6PEUK' }],
+  },
+  {
+    id: "log-work-racing-track",
+    date: "2025-03",
+    title: '模拟赛道：沙海幻途',
+    title_en: 'Racing Track: Mirage Drift',
+    tags: ["作品","介绍"],
+    subject: "work/racing-track",
+    period: '2025.03',
+    spec: '3D · 第三人称赛车 · UE4',
+    spec_en: '',
+    proj: '',
+    workTags: ['关卡设计'],
+    shots: [{src:'images/racing-track/01.jpg', note:'实机截图'}],
+    videos: [{ label:'实机演示', src:'bilibili:BV1c5HS6YEeA' }],
+  },
+  {
+    id: "log-work-flesh-colored-horror",
+    date: "2024-11",
+    title: '血肉之怖：病院秘辛',
+    title_en: 'Flesh-Colored Horror: Phantom Womb',
+    tags: ["作品","介绍"],
+    subject: "work/flesh-colored-horror",
+    period: '2024.11',
+    spec: '3D · 第一人称恐怖 · UE4',
+    spec_en: '',
+    proj: '',
+    workTags: ['关卡设计'],
+    shots: [{src:'images/flesh-colored-horror/01.jpg', note:'实机截图'}],
+    videos: [{ label:'实机演示', src:'bilibili:BV1DRHU6LEq4' }],
+  },
+  {
+    id: "log-work-drain",
+    date: "2024-09",
+    title: '下水道',
+    title_en: 'The Drain',
+    tags: ["作品","介绍"],
+    subject: "work/drain",
+    period: '2024.09',
+    proj: 'Inside',
+    workTags: ['关卡设计'],
+    shots: [{src:'images/mods/drain01.jpg', note:'关卡布局'}],
+    videos: [],
+  },
+  {
+    id: "log-work-babylon",
+    date: "2024-10",
+    title: "阿勒颇的巴比伦空中花园",
+    title_en: "Aleppo's Hanging Garden of Babylon",
+    tags: ["作品","介绍"],
+    subject: "work/babylon",
+    period: '2024.09 – 2024.10',
+    proj: '古墓丽影：崛起',
+    workTags: ['关卡设计','任务设计'],
+    shots: [{src:'images/mods/babylon01.jpg', note:'关卡布局'},
+                  {src:'images/mods/babylon02.jpg', note:'流程表'}],
+    videos: [],
+  },
+  {
+    id: "log-work-key-to-time",
+    date: "2024-12",
+    title: '时之钥',
+    title_en: 'Key to Time',
+    tags: ["作品","介绍"],
+    subject: "work/key-to-time",
+    period: '2024.12',
+    proj: '巫师 3：狂猎',
+    workTags: ['叙事设计'],
+    shots: [{src:'images/mods/key-to-time01.jpg', note:'演示截图'}],
+    videos: [],
+  },
+  {
+    id: "log-work-proust-monter",
+    date: "2025-02",
+    title: '普鲁斯特·蒙特内',
+    title_en: 'Proust Monter',
+    tags: ["作品","介绍"],
+    subject: "work/proust-monter",
+    period: '2025.02',
+    proj: '光与影：33 号远征队',
+    workTags: ['叙事设计','任务设计'],
+    shots: [{src:'images/mods/proust-monter01.jpg', note:'文档截图'}],
+    videos: [],
+  },
+  {
+    id: "log-work-battle-of-the-90s",
+    date: "2025-02",
+    title: '流行荣耀：世纪之交',
+    title_en: 'Battle of the 90s',
+    tags: ["作品","介绍"],
+    subject: "work/battle-of-the-90s",
+    period: '2025.01 - 2025.02',
+    proj: '',
+    workTags: ['UI/UX'],
+    shots: [{src:'images/battle-of-the-90s/01.jpg', note:'线框图'},
+             {src:'images/battle-of-the-90s/02.jpg', note:'布局图'}],
+    videos: [],
+  },
+  {
+    id: "log-work-counter-ghost-log",
+    date: "2025-05",
+    title: '灵单猎人 - 日志',
+    title_en: 'Counter Ghost - Journal',
+    tags: ["作品","介绍"],
+    subject: "work/counter-ghost-log",
+    period: '2025.03 – 2025.05',
+    proj: '灵单猎人',
+    workTags: ['UI/UX'],
+    shots: [{src:'images/counter-ghost/03.jpg', note:'实机截图'}],
+    videos: [],
+  },
+  {
+    id: "log-work-symbiont-hud",
+    date: "2025-09",
+    title: '赛博蛹生 - 抬头显示与界面交互',
+    title_en: 'Symbiont - HUD & Interface Interaction',
+    tags: ["作品","介绍"],
+    subject: "work/symbiont-hud",
+    period: '2025.05 – 2025.09',
+    proj: '赛博蛹生',
+    workTags: ['UI/UX'],
+    shots: [{src:'images/symbiont/03.jpg', note:'实机截图 - HUD'},
+             {src:'images/symbiont/04.jpg', note:'实机截图 - 贩卖机'}],
+    videos: [],
+  },
 ];

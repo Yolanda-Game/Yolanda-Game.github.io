@@ -1,6 +1,7 @@
   /* ============ 全图层（项目页 / 作品页共用） ============ */
   const lightLayer = $('#lightLayer');
   let lightList = [], lightI = 0, lightBack = null;
+  let lightClosingTimer = null;
 
   function lightPaint(){
     const sh = lightList[lightI] || { src:'', note:'' };
@@ -9,8 +10,8 @@
     img.src = sh.src;
     img.onerror = () => { box.innerHTML = '<div class="phbox">图片未找到：' + esc(sh.src) + '</div>'; };
     box.appendChild(img);
-    $('#lightNote').textContent = sh.note || '';
-    $('#lightNote').hidden = !sh.note;
+    $('#lightNote').textContent = mediaCaption(sh, 'image');
+    $('#lightNote').hidden = !mediaCaption(sh, 'image');
     $('#lightIdx').textContent = p2(lightI + 1) + ' / ' + p2(lightList.length);
     if (lightBack) lightBack(lightI);
   }
@@ -18,20 +19,27 @@
     lightList = list || []; lightI = i || 0; lightBack = after || null;
     $('#lightName').textContent = name || '';
     lightPaint();
+    clearTimeout(lightClosingTimer);
+    lightLayer.classList.remove('closing');
     lightLayer.classList.add('on');
   }
-  function lightClose(){ lightLayer.classList.remove('on'); }
+  function lightClose(){
+    lightLayer.classList.remove('on');
+    lightLayer.classList.add('closing');
+    clearTimeout(lightClosingTimer);
+    lightClosingTimer = setTimeout(() => lightLayer.classList.remove('closing'), 420);
+  }
   function lightGo(d){
     if (!lightList.length) return;
     lightI = (lightI + d + lightList.length) % lightList.length;
     lightPaint();
   }
 
-  $('#lightClose').onclick = lightClose;
-  $('#lightPrev').onclick = () => lightGo(-1);
-  $('#lightNext').onclick = () => lightGo(1);
+  $('#lightClose').onclick = e => { e.stopPropagation(); lightClose(); };
+  $('#lightPrev').onclick = e => { e.stopPropagation(); lightGo(-1); };
+  $('#lightNext').onclick = e => { e.stopPropagation(); lightGo(1); };
   lightLayer.addEventListener('click', e => {
-    if (e.target.closest('img, .pn, .dl-share')) return;
+    if (e.target.closest('img, .pn, .dl-share, .shot-bar, .shot-note')) return;
     lightClose();
   });
   /* 点详情层里那张大图 → 看全图；翻到哪张，关掉后详情层也停在哪张 */
@@ -43,6 +51,7 @@
   $('#mClose').addEventListener('click', pjClose);
   $('#mLang').addEventListener('click', () => setLang(LANG === 'cn' ? 'en' : 'cn'));
   pjLayer.addEventListener('click', e => {
+    if (lightLayer.classList.contains('on') || lightLayer.classList.contains('closing')) return;
     const t = e.target;
     if (t.closest && t.closest(NO_CLOSE)) return;
     pjClose();

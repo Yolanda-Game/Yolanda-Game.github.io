@@ -79,8 +79,8 @@
     img.src = sh.src;
     img.onerror = () => { box.innerHTML = '<div class="phbox">图片未找到：' + esc(sh.src) + '</div>'; };
     box.appendChild(img);
-    $('#wShotNote').textContent = sh.note || '';
-    $('#wShotNote').hidden = !sh.note;
+    $('#wShotNote').textContent = mediaCaption(sh, 'image');
+    $('#wShotNote').hidden = !mediaCaption(sh, 'image');
     $('#wShotIdx').textContent = p2(wkShot+1) + ' / ' + p2(L.length);
   }
   /* 作品详情里跟语言有关的字段，只在这一处画（切语言时复用） */
@@ -95,6 +95,9 @@
     $('#wProj').hidden = !w.proj;
     $('#wIntro').innerHTML = md(pick(w.md, w.md_en) || '');
     fixMedia($('#wIntro'));
+    const imgNote = wkShots(w)[wkShot] || wkShots(w)[0];
+    $('#wShotNote').textContent = mediaCaption(imgNote, 'image');
+    mediaRefreshCaptions(wkLayer);
     langSw($('#wLang'), hasEN(w));
   }
 
@@ -111,21 +114,18 @@
     wkLangPaint();
 
     const side = $('#wSide');
-    side.querySelectorAll('.vid').forEach(v => v.remove());
-    (w.videos || []).filter(v => v && v.src).forEach(v => {
-      const d = document.createElement('div');
-      d.className = 'vid';
-      d.dataset.src = v.src;
-      d.innerHTML = '<span class="pl">▶</span><span class="vl">' + esc(v.label || '视频') + '</span>';
-      side.appendChild(d);
-    });
+    side.querySelectorAll('.media-video-carousel, .vid').forEach(el => el.remove());
+    mediaVideoCarousel(side, w.videos || [], 'w');
 
     wkShot = 0; wkPaintShot();
     wkLayer.classList.add('on');
     fixMedia(wkLayer);
     $('#wCol').scrollTop = 0;
   }
-  function wkClose(){ wkLayer.classList.remove('on'); }
+  function wkClose(){
+    wkLayer.classList.remove('on');
+    wkLayer.querySelectorAll('.media-video-stage iframe').forEach(f => f.remove());
+  }
 
   $('#wPgPrev').addEventListener('click', () => wkGoPage(-1));
   $('#wPgNext').addEventListener('click', () => wkGoPage(1));
@@ -140,6 +140,7 @@
     lightOpen(wkShots(w), wkShot, w.title, n => { wkShot = n; wkPaintShot(); });
   });
   wkLayer.addEventListener('click', e => {
+    if (lightLayer.classList.contains('on') || lightLayer.classList.contains('closing')) return;
     const t = e.target;
     if (t.closest && t.closest(NO_CLOSE)) return;
     wkClose();

@@ -403,9 +403,11 @@
 <script src="data/works.js"></script>
 <script src="data/logs.js"></script>
 <script src="data/about.js"></script>
+<script src="data/content.js"></script>
 
 <!-- 主程序：后运行 -->
-<!-- v1.8.2：JS 按顺序加载；保留 data/projects.js 和 data/works.js 在此之前 -->
+<!-- v1.9.0：正文关联脚本先于页面逻辑；项目、作品与日志只维护元信息 -->
+<script src="js/content.js"></script>
 <script src="js/core.js"></script>
 <script src="js/markdown.js"></script>
 <script src="js/log-data.js"></script>
@@ -415,6 +417,7 @@
 <script src="js/project.js"></script>
 <script src="js/lightbox.js"></script>
 <script src="js/work.js"></script>
+<script src="js/media.js"></script>
 <script src="js/boot.js"></script>
 </body>
 </html>

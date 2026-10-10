@@ -1,58 +1,36 @@
-  /* 兼容桥接层：把外部日志数据暂时转为隐藏 DOM，再交由既有解析器处理。
-     v1.9 统一内容模型之前不要删除。 */
-  if (!Array.isArray(window.YOLANDA_LOGS)) throw new Error('data/logs.js 未加载');
-  const logStore = $('#logStore');
-  window.YOLANDA_LOGS.forEach(entry => {
-    const article = document.createElement('article');
-    article.id = entry.id;
-    const cn = document.createElement('script');
-    cn.type = 'text/markdown';
-    cn.textContent = entry.markdown || '';
-    article.appendChild(cn);
-    if (entry.markdown_en) {
-      const en = document.createElement('script');
-      en.type = 'text/markdown';
-      en.dataset.lang = 'en';
-      en.textContent = entry.markdown_en;
-      article.appendChild(en);
-    }
-    logStore.appendChild(article);
+/* v1.9.1：直接从日志数据生成时间线；支持多标签、年月归档及图片视频。 */
+const DEV=location.protocol==='file:'||location.hash==='#dev';
+/* 媒体由 js/media.js 统一渲染成可切换合集，不再向 Markdown 末尾逐项追加。 */
+function logMediaHTML(){ return ''; }
+const posts=window.YOLANDA_LOGS.map(entry=>{
+  const fm=readFM(entry.markdown||'');
+  const tags=Array.isArray(entry.tags)?entry.tags:(entry.tag?[entry.tag]:['更新']);
+  const date=entry.date||fm.meta.date||'';
+  const [y,m,d0]=date.split('-').map(Number),d=d0||0;
+  const title=entry.title||fm.meta.title||'(无标题)';
+  const time=entry.time||fm.meta.time||'';
+  const media=logMediaHTML(entry,fm.body);
+  const body=md(fm.body),en=entry.markdown_en?md(entry.markdown_en):'';
+  // Markdown 已经内嵌相同媒体路径的条目不再重复收进合集。
+  const shots=(Array.isArray(entry.shots)?entry.shots:[]).filter(sh=>{
+    const src=typeof sh==='string'?sh:sh&&sh.src;
+    return !!src&&!fm.body.includes(src);
   });
-
-  /* ============ 日志数据 ============ */
-  const DEV = location.protocol === 'file:' || location.hash === '#dev';
-  const posts = $$('#logStore article').map(a => {
-    /* 中文正文 = 第一个没标 data-lang 的 markdown 块；
-       英文正文（可选）= 第二个 <script type="text/markdown" data-lang="en">，里面只写正文 */
-    const mdEl = a.querySelector('script[type="text/markdown"]:not([data-lang])');
-    const enEl = a.querySelector('script[type="text/markdown"][data-lang="en"]');
-    let meta = {}, html = '', html_en = '', date = '', time = '', tag = '进度',
-        title = '', title_en = '', draft = false;
-    if (mdEl){
-      const fm = readFM(mdEl.textContent);
-      meta = fm.meta;
-      date = meta.date || ''; time = meta.time || '';
-      tag = meta.tag || tag; title = meta.title || '';
-      title_en = meta.title_en || '';          /* 英文标题写在中文那块的属性块里 */
-      draft = /^(true|1|yes)$/i.test(meta.draft || '');
-      html = md(fm.body);
-    }
-    if (enEl) html_en = md(enEl.textContent);
-    if (!title){ const h = a.querySelector('h3'); title = h ? h.textContent.trim() : '(无标题)'; }
-    const [y,m,d] = (date || '1970-01-01').split('-').map(Number);
-    return {
-      id: a.id || ('log-' + date + (time ? '-' + time.replace(':','') : '')),
-      y, m, d, time, tag, title, title_en, html, html_en, draft,
-      sortKey: date + ' ' + (time || '00:00'),
-      dstr: y + '.' + p2(m) + '.' + p2(d) + (time ? ' ' + time : ''),
-      mdstr: p2(m) + '.' + p2(d)
-    };
-    })
-      .filter(p => p.y && (!p.draft || DEV))
-      .sort((a, b) => b.sortKey.localeCompare(a.sortKey));
-
-  const PREF = ['进度','拆解','技术','说明'];
-  const TAGS = PREF.filter(t => posts.some(p => p.tag === t))
-    .concat(Array.from(new Set(posts.map(p => p.tag))).filter(t => PREF.indexOf(t) < 0));
-  let filter = null, selId = null;
-  const openY = new Set(), openM = new Set();
+  const videos=(Array.isArray(entry.videos)?entry.videos:[]).filter(v=>{
+    const src=typeof v==='string'?v:v&&v.src;
+    return !!src&&!fm.body.includes(src);
+  });
+  const isIntro=tags.includes('介绍') && (tags.includes('项目')||tags.includes('作品')) && !!entry.subject;
+  return {id:entry.id,y,m,d,time,title,title_en:entry.title_en||fm.meta.title_en||'',
+    mediaShots:shots,mediaVideos:videos,isIntro,
+    tags,tag:tags[0]||'更新',html:body+media,html_en:en?en+media:'',
+    draft:!!entry.draft,sortKey:(d?date:date+'-01')+' '+(time||'00:00'),
+    dstr:y+'.'+p2(m)+(d?'.'+p2(d):'')+(time?' '+time:''),
+    mdstr:p2(m)+(d?'.'+p2(d):'')};
+}).filter(p=>p.y&&p.m>=1&&p.m<=12&&(!p.draft||DEV))
+  .sort((a,b)=>b.sortKey.localeCompare(a.sortKey));
+const PREF=['项目','作品','介绍','更新','拆解','技术','说明'];
+const TAGS=PREF.filter(t=>posts.some(p=>p.tags.includes(t)))
+  .concat([...new Set(posts.flatMap(p=>p.tags))].filter(t=>!PREF.includes(t)));
+let filter=null,selId=null;
+const openY=new Set(),openM=new Set();

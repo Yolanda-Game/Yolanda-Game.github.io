@@ -91,3 +91,24 @@
   -webkit-overflow-scrolling: touch;
 }
 #pPrev, #pNext { touch-action: manipulation; }
+
+/* v1.9.1 多标签横滑：避免新增类别把手机端日志阅读区域挤小 */
+@media (max-width:1080px){
+  #world section.devlog .dl-floor{
+    flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden;
+    white-space:nowrap; touch-action:pan-x; overscroll-behavior-x:contain;
+    scrollbar-width:none; padding-bottom:5px;
+  }
+  #world section.devlog .dl-floor::-webkit-scrollbar{display:none}
+  #world section.devlog .dl-floor span{ flex:0 0 auto; }
+  #world section.devlog .dl-pmeta{ flex-wrap:wrap; row-gap:8px; }
+  #world section.devlog .dlTag{ white-space:normal; line-height:1.6; }
+}
+
+/* v1.9.1 发布前修复：窄屏下图片区和视频合集分别占一行，避免交叉覆盖。 */
+@media (max-width:1080px){
+  .pj-side .media-video-carousel{ order:3; margin-top:8px; }
+  .media-video-bar,.media-gallery-bar{ gap:8px; }
+  .media-video-bar .shot-note,.media-gallery-bar .shot-note{ font-size:12px; }
+  .media-video-bar .pn,.media-gallery-bar .pn{ flex-basis:30px; width:30px; height:30px; }
+}
