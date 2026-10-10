@@ -780,8 +780,15 @@
     .pj-side .vid{ order:3; }
   }
 
-  /* 项目目录：索引超出屏幕时可以滚（以后加项目不会被裁） */
-  .pj-index{ overflow-y:auto; min-height:0; max-height:52svh; overscroll-behavior:contain; }
+  /* 项目目录：独立滚动区域 */
+  .pj-index{
+    overflow-y:auto;
+    min-height:0;
+    max-height:52svh;
+    overscroll-behavior:contain;
+    touch-action:pan-y;
+    -webkit-overflow-scrolling:touch;
+  }
 
   /* 所有内部滚动区统一用站点那套细滚动条（4px、低对比） */
   .pj-index, .ab-layer .dl-split, .ab-body{
@@ -1871,21 +1878,68 @@ draft: true
     if (e.key === 'ArrowDown')  step('down');
     if (e.key === 'Escape')     home();
   });
+
   addEventListener('wheel', e => {
     if (abLayer.classList.contains('on')) return;
-    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) { e.deltaX > 12 ? step('right') : step('left'); }
-    else { e.deltaY > 12 ? step('down') : e.deltaY < -12 ? step('up') : 0; }
+
+    // 项目索引拥有独立滚动权限
+    // 鼠标位于索引内时，不允许触发整页切换
+    if (e.target instanceof Element &&
+        e.target.closest('.pj-index')) {
+      return;
+    }
+
+    // 其余区域保持原来的页面导航功能
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      e.deltaX > 12 ? step('right') : step('left');
+    } else {
+      e.deltaY > 12 ? step('down') :
+      e.deltaY < -12 ? step('up') : 0;
+    }
   }, { passive:true });
 
-  let sx=0, sy=0;
-  addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive:true });
+  
+  let sx = 0, sy = 0;
+  let touchInProjectIndex = false;
+
+  addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) return;
+
+    sx = e.touches[0].clientX;
+    sy = e.touches[0].clientY;
+
+    // 记录手指是否从项目索引区域开始滑动
+    touchInProjectIndex =
+      e.target instanceof Element &&
+      !!e.target.closest('.pj-index');
+  }, { passive:true });
+
   addEventListener('touchend', e => {
     if (abLayer.classList.contains('on')) return;
-    const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+
+    // 从项目索引开始的滑动，只处理内部滚动
+    if (touchInProjectIndex) {
+      touchInProjectIndex = false;
+      return;
+    }
+
+    // 多指操作不触发切页
+    if (e.touches.length > 0) return;
+
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+
     if (Math.max(Math.abs(dx), Math.abs(dy)) < 50) return;
-    Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? step('left') : step('right'))
-                                : (dy > 0 ? step('up')   : step('down'));
+
+    Math.abs(dx) > Math.abs(dy)
+      ? (dx > 0 ? step('left') : step('right'))
+      : (dy > 0 ? step('up') : step('down'));
   }, { passive:true });
+
+  addEventListener('touchcancel', () => {
+    touchInProjectIndex = false;
+  }, { passive:true });
+
   brand.onclick = home;
 
   const mmGrid = $('#mmGrid'), mmName = $('#mmName');
