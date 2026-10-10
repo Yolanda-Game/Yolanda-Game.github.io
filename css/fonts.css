@@ -1,0 +1,19 @@
+
+
+    /* 思源黑体（可变字重 250–900） */
+  @font-face{
+    font-family:"Source Han Sans SC";
+    font-weight:250 900; font-style:normal; font-display:swap;
+    src:url("../fonts/SourceHanSansSC-VF.woff2") format("woff2"),
+        local("Source Han Sans SC"), local("Noto Sans SC"),
+        local("HarmonyOS Sans SC"), local("PingFang SC"), local("Microsoft YaHei");
+  }
+  /* 思源宋体（可变字重 200–900） */
+  @font-face{
+    font-family:"Source Han Serif SC";
+    font-weight:200 900; font-style:normal; font-display:swap;
+    src:url("../fonts/SourceHanSerifSC-VF.woff2") format("woff2"),
+        local("Source Han Serif SC"), local("Noto Serif SC"), local("Songti SC");
+  }
+
+  

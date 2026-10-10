@@ -1,0 +1,86 @@
+/* ============ 窄屏补齐（手机 / 笔记本缩放 / iPad） ============ */
+  @media (max-width:1080px){
+
+    /* 技能块：标签改单列，别再挤成两列（图1/图2） */
+    .bk .bd.two{ columns:1; }
+
+    /* 项目页「目录」：索引行允许换行，右边的日期不再被挤出屏幕（图3） */
+    .pj-row{ flex-wrap:wrap; align-items:flex-start; }
+    .pj-row .rs{ margin-left:0; }
+
+    /* 轮播页「查看项目」按钮：给足宽度，两行字不再折行（图4） */
+    .pj-act .ab-btn{ width:min(320px,100%); }
+    .pj-act .ab-btn span{ letter-spacing:.14em; }
+
+    /* 目录页：手机上行距收紧，名字独占一行，日期独占一行 */
+    .pj-row{ padding:12px 0; }
+    .pj-row .rname{ flex:1 1 100%; }
+    .pj-row .rs{ margin-left:0; }
+    .pj-row .rd{ flex:1 1 100%; }
+    .pj-row .rs i.sp{ display:none; }        /* 日期换行后，中间那个点就不要了 */
+
+    /* 作品页标签行：窄屏不换行，改成一行内横滑 */
+    .wk-floor{ flex-wrap:nowrap; overflow-x:auto; gap:20px; padding-bottom:4px;
+      scrollbar-width:none; -ms-overflow-style:none; }
+    .wk-floor::-webkit-scrollbar{ display:none }
+
+    /* 详情层固定标题区：上下堆叠 + 全部左对齐（图5） */
+    .pj-fhead{ flex-direction:column; align-items:flex-start; gap:12px; }
+    .pj-fr{ align-items:flex-start; text-align:left; }
+
+    /* 详情层阅读顺序：截图 → 正文 → 视频（你要的那个） */
+    .pj-side{ display:contents; }
+    .shots{ order:1; }
+    .pj-text{ order:2; }
+    .pj-side .vid{ order:3; }
+  }
+
+  /* 项目目录：独立滚动区域 */
+  .pj-index{
+    overflow-y:auto;
+    min-height:0;
+    max-height:52svh;
+    overscroll-behavior:contain;
+    touch-action:pan-y;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  /* 所有内部滚动区统一用站点那套细滚动条（4px、低对比） */
+  .pj-index, .ab-layer .dl-split, .ab-body{
+    scrollbar-width:thin; scrollbar-color:rgba(198,212,232,.18) transparent; }
+  .pj-index::-webkit-scrollbar,
+  .ab-layer .dl-split::-webkit-scrollbar,
+  .ab-body::-webkit-scrollbar{ width:4px }
+  .pj-index::-webkit-scrollbar-thumb,
+  .ab-layer .dl-split::-webkit-scrollbar-thumb,
+  .ab-body::-webkit-scrollbar-thumb{ background:rgba(198,212,232,.16) }
+
+  /* ============ 窄屏补齐 · 第二批 ============ */
+  @media (max-width:1080px){
+
+    /* ① 作品页标签行：不换行、不压缩，改成一行内横滑 */
+    .wk-floor{ flex-wrap:nowrap; overflow-x:auto; touch-action:pan-x; gap:20px;
+      padding-bottom:4px; scrollbar-width:none; -ms-overflow-style:none; }
+    .wk-floor::-webkit-scrollbar{ display:none }
+    .wk-floor span{ flex:0 0 auto; white-space:nowrap; }
+
+    /* ② 日志页：索引再收一点，正文多露一点（原来 144px / 28%） */
+    .dl-split{ grid-template-columns:1fr;
+      grid-template-rows:minmax(104px,21%) minmax(0,1fr); gap:17px; }
+
+    /* ③ 左上角品牌：英文行缩小，给顶部提示让位，不再互相压住 */
+    #brand .brand-role{ font-size:10px; letter-spacing:.16em; }
+
+    /* ④ 详情层固定区：堆叠后把字距收紧 + 行距放开，role/spec 不再断在半截词上 */
+    .pj-fr{ letter-spacing:.1em; line-height:1.8; }
+
+    /* ⑤ 项目轮播：品类那行跟着分辨率缩小，不再折行 */
+    #pSpec, #pSpecEn{ font-size:.88em; letter-spacing:.08em; }
+
+    /* ⑦ 手机上技能块不做折叠：标签直接全部显示（最稳，不可能被裁） */
+    .bk{ height:auto !important; overflow:visible; }
+    .bk .sp{ display:none; }
+    .bk .bd{ display:block !important; max-height:none !important;
+      opacity:1 !important; margin-top:12px !important; }
+  }
+
